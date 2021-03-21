@@ -2,56 +2,53 @@ from tkinter import *
 from tkinter import filedialog as fd
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 
-class
+class Watermarker:
+    def __init__(self):
+        self.img = None
+        self.img_for_change = None
+        self.filename = ''
+        self.window = Tk()
+
+        self.file_button = Button(text="Open File",
+                                  command=self.open_image)
+        self.file_button.grid(column=0, row=0)
+
+        self.canvas = Canvas(highlightthickness=0, width=250)
+        self.img = ImageTk.PhotoImage(Image.open('fake_image.jpg').resize((250, 250), Image.ANTIALIAS))
+        self.img_for_changing = ImageTk.PhotoImage(Image.open('fake_image.jpg'))
+        self.file_name = 'fake_image.jpg'
+        self.canvas_image = self.canvas.create_image(125, 125, anchor=CENTER, image=self.img)
+        self.canvas.grid(column=0, row=1)
+
+        self.button = Button(text="Save with watermark", command=self.put_watermark)
+        self.button.grid(column=0, row=2)
+
+        self.window.mainloop()
+
+    def open_image(self):
+        file = fd.askopenfilename()
+        file = file.replace('/', '\\\\')
+        print(file)
+        self.img = ImageTk.PhotoImage(Image.open(file).resize((250, 250), Image.ANTIALIAS))
+        self.img_for_changing = Image.open(file)
+        self.file_name = file
+        self.canvas.itemconfig(self.canvas_image, image=self.img)
+
+    def put_watermark(self):
+        black = (3, 8, 12)
+        pos = (10, 10)
+        font = ImageFont.truetype("arial.ttf", 40)
+        text = "wm"
+        self.img_for_changing = Image.open(self.file_name)
+        drawing = ImageDraw.Draw(self.img_for_changing)
+        drawing.text(pos, text, fill=black, font=font)
+        save_name = fd.asksaveasfilename()
+        save_name = save_name.replace('/', '\\\\')
+        rgb_im = self.img_for_changing.convert('RGB')
+        rgb_im.save(save_name)
+        self.img = ImageTk.PhotoImage(Image.open(save_name).resize((250, 250), Image.ANTIALIAS))
+        self.canvas.itemconfig(self.canvas_image, image=self.img)
 
 
-def open_image():
-    file = fd.askopenfilename(
-        text="Choose file to watermark: ",
-        filetypes=[('image files', '.png;.jpg'),  # nope,returns *.png;.jpg
-                   ('image files!', '*.png;*.jpg')])
-    file = file.replace('/', '\\\\')
-    print(file)
-    global img, img_for_changing, file_name
-    img = ImageTk.PhotoImage(Image.open(file).resize((250, 250), Image.ANTIALIAS))
-    img_for_changing = Image.open(file)
-    file_name = file
-    canvas.itemconfig(canvas_image, image=img)
-
-
-def put_watermark():
-    black = (3, 8, 12)
-    pos = (10, 10)
-    font = ImageFont.truetype("arial.ttf", 40)
-    text = "wm"
-    global img_for_changing, img, file_name
-    img_for_changing = Image.open(file_name)
-    drawing = ImageDraw.Draw(img_for_changing)
-    drawing.text(pos, text, fill=black, font=font)
-    save_name = fd.asksaveasfilename(
-        text="Save file as: ",
-        filetypes=[('image files', '.png;.jpg'),  # nope,returns *.png;.jpg
-                   ('image files!', '*.png;*.jpg')]
-    )
-    save_name = save_name.replace('/', '\\\\')
-    img_for_changing.save(save_name)
-    img = ImageTk.PhotoImage(Image.open(save_name).resize((250, 250), Image.ANTIALIAS))
-    canvas.itemconfig(canvas_image, image=img)
-
-
-window = Tk()
-file_button = Button(text="Open File",
-                     command=open_image)
-file_button.grid(column=0, row=0)
-
-canvas = Canvas(highlightthickness=0, width=250)
-img = ImageTk.PhotoImage(Image.open('fake_image.jpg').resize((250, 250), Image.ANTIALIAS))
-img_for_changing = ImageTk.PhotoImage(Image.open('fake_image.jpg'))
-file_name = 'fake_image.jpg'
-canvas_image = canvas.create_image(125, 125, anchor=CENTER, image=img)
-canvas.grid(column=0, row=1)
-
-button = Button(text="Something", command=put_watermark)
-button.grid(column=0, row=2)
-
-window.mainloop()
+if __name__ == "__main__":
+    wm = Watermarker()
